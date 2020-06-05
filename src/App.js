@@ -19,7 +19,7 @@ function App() {
 
     const [ lista, setLista ] = useState([]); // imutabilidade
     const [ open, setOpen ] = useState(false);
-    const [ tarefa, setModelo ] = useState('');
+    const [ modelo, setModelo ] = useState('');
 
     function loadData() { 
         api.get('/modelo').then((response) => { 
@@ -70,7 +70,7 @@ function App() {
                             <input type="checkbox" checked={item.done} onChange={() => markAsDone(item.id)}/>
                         </TableCell>
                         <TableCell>
-                            <Button variant="outlined" size="small" color="secondary" onClick={() => deleteTarefa(item.id)}>Apagar</Button>
+                            <Button variant="outlined" size="small" color="secondary" onClick={() => deleteModelo(item.id)}>Apagar</Button>
                         </TableCell>
                     </TableRow>
                 ))}
