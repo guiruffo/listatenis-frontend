@@ -1,50 +1,114 @@
-import React, {useState, useEffect} from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import api from './api';
-
-import Button from '@material-ui/core/Button';
-
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableRow from '@material-ui/core/TableRow';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import Header from './header';
+import { 
+    Container, 
+    Table, 
+    TableRow, 
+    TableCell, 
+    Dialog, 
+    Button, 
+    DialogTitle, 
+    DialogContent, 
+    DialogContentText, 
+    TextField, 
+    DialogActions} from '@material-ui/core';
+import './style.css';
 
 function App() {
 
-    const [lista, setLista] = useState([]);
-    const [ loading, setLoading ] = useState(true);
+    const [ lista, setLista ] = useState([]); // imutabilidade
+    const [ open, setOpen ] = useState(false);
+    const [ tarefa, setModelo ] = useState('');
 
-    useEffect(() => {
-        api.get('/modelos').then((response) => {
+    function loadData() { 
+        api.get('/modelo').then((response) => { 
             const itens = response.data;
             setLista(itens);
-            setLoading(false);
+        });
+    }
+
+    useEffect(() => loadData(), [])
+
+    const openModal = () => setOpen(true);
+
+    // function closeModal() { setOpen(false); }
+    const closeModal = () => setOpen(false);
+
+     function addModelo() { 
+         const name = modelo;
+         api.post('/modelo', { name: name }).then((response) => {
+            setModelo('');
+            setOpen(false);
+            loadData();
         })
-    }, [])
+     }
+
+     function markAsDone(id) { 
+         api.patch(`/modelo/${id}/done`).then((response) => {
+             loadData()
+         })
+     }
+
+     function deleteModelo(id) {
+         api.delete(`/modelo/${id}`).then((response) => { 
+            loadData()
+         })
+     }
+    
 
     return (
         <>
-            { loading ? <CircularProgress />: <div/> }
+        <Header />
+        <Container maxWidth="lg" className="container"> 
             <Table>
-                <TableBody>
                 {lista.map(item => (
                     <TableRow key={item.id}>
                         <TableCell>{item.id}</TableCell>
                         <TableCell>{item.name}</TableCell>
                         <TableCell>
-                            <input type="checkbox" checked={item.done} />
+                            <input type="checkbox" checked={item.done} onChange={() => markAsDone(item.id)}/>
+                        </TableCell>
+                        <TableCell>
+                            <Button variant="outlined" size="small" color="secondary" onClick={() => deleteTarefa(item.id)}>Apagar</Button>
                         </TableCell>
                     </TableRow>
                 ))}
-                </TableBody>
             </Table>
-            <br>
-            </br>
-            <Link to="/create">Adicionar</Link>
-            <Button variant="contained" color="primary">
-                Primary
+            <Button 
+                onClick={openModal}
+                variant="contained" 
+                color="primary" 
+                style={{marginTop: '20px'}}>
+                Adicionar
             </Button>
+        </Container>
+        <Dialog open={open} onClose={closeModal} fullWidth={true} maxWidth="sm">
+            <DialogTitle id="form-dialog-title">Novo Modelo</DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    Digite o modelo que pretende adicionar.
+                </DialogContentText>
+                <TextField
+                    autoFocus
+                    margin="dense"
+                    id="name"
+                    label="Modelo"
+                    type="email"
+                    fullWidth
+                    value={modelo}
+                    onChange={e => setModelo(e.target.value)}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={closeModal} color="primary">
+                    Cancelar
+                </Button>
+                <Button onClick={addModelo} color="primary">
+                    Salvar
+                </Button>
+            </DialogActions>
+        </Dialog>
         </>
     );
 }
