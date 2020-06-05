@@ -1,24 +1,32 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 
-const lista = [
-    { id: 1, name: 'Nike', done: false},
-    { id: 2, name: 'Adidas', done: false},
-    { id: 3, name: 'All Stars', done: true},
-]
+import api from './api';
 
 function App() {
-  return (
-    <table>
-        {lista.map(item => (
-            <tr>
-                <td>id</td>
-                <td>name</td>
-                <td>done</td>
-            </tr>
-        ))}
+
+    const [lista, setLista] = useState([]);
+
+    useEffect(() => {
+        api.get('/modelos').then((response) => {
+            const itens = response.data;
+            setLista(itens);
+        })
+    }, [])
+
+    return (
+        <table>
+            {lista.map(item => (
+                <tr key={item.id}>
+                    <td>{item.id}</td>
+                    <td>{item.name}</td>
+                    <td>
+                        <input type="checkbox" checked={item.done}/>
+                    </td>
+                </tr>
+            ))}
         
-    </table>
-  );
+        </table>
+    );
 }
 
 export default App;
